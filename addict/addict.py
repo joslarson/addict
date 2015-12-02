@@ -44,12 +44,12 @@ class Dict(dict):
                 continue
             elif isinstance(arg, dict):
                 for key, val in arg.items():
-                    self[key] = val
+                    self[key] = _hook(val)
             elif isinstance(arg, tuple) and (not isinstance(arg[0], tuple)):
-                self[arg[0]] = arg[1]
+                self[arg[0]] = _hook(arg[1])
             elif isinstance(arg, (list, tuple)) or isgenerator(arg):
                 for key, val in arg:
-                    self[key] = val
+                    self[key] = _hook(val)
             else:
                 raise TypeError("Dict does not understand "
                                 "{0} types".format(type(arg)))
@@ -74,21 +74,9 @@ class Dict(dict):
         E.g. some_instance_of_Dict['b'] = val. If 'val
 
         """
-        value = self._hook(value)
+        #value = self._hook(value)
         super(Dict, self).__setitem__(name, value)
 
-    @classmethod
-    def _hook(cls, item):
-        """
-        Called to ensure that each dict-instance that are being set
-        is a addict Dict. Recurses.
-
-        """
-        if isinstance(item, dict):
-            return cls(item)
-        elif isinstance(item, (list, tuple)):
-            return type(item)(cls._hook(elem) for elem in item)
-        return item
 
     def __getattr__(self, item):
         return self.__getitem__(item)
@@ -247,3 +235,15 @@ class Dict(dict):
                 self[k] = v
             else:
                 self[k].update(v)
+
+def _hook(item):
+    """
+    Called to ensure that each dict-instance that are being set
+    is a addict Dict. Recurses.
+
+    """
+    if isinstance(item, dict):
+        return Dict(item)
+    elif isinstance(item, (list, tuple)):
+        return type(item)(_hook(elem) for elem in item)
+    return item

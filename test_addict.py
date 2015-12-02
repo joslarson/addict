@@ -354,7 +354,7 @@ class Tests(unittest.TestCase):
 
         org.update(someother)
         self.assertDictEqual(org, correct)
-        self.assertIsInstance(org.b[0], Dict)
+        self.assertIsInstance(org.b[0], dict)
 
     def test_copy(self):
         class MyMutableObject(object):
